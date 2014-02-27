@@ -1,25 +1,61 @@
 var shoe = require('shoe')
 var through = require('through')
 
-var ws = shoe('/anarchy')
-var output = through(function(data){
-  this.queue(JSON.stringify(data)) 
-})
+// specify instrument
+var socketUrl = '/sockets' + window.location.pathname
 
+// server socket
+var ws = shoe(socketUrl)
+var lastMessage = null
+var output = through(function(data){
+  var message = JSON.stringify(data)
+  if (message != lastMessage){
+    this.queue(message) 
+    lastMessage = message
+    console.log(data)
+  }
+})
 output.pipe(ws)
 
+// send data to server
 setInterval(function(){
-  output.write(current)
-}, (1000/60))
+  if (window.current.active){
+    output.write(current)
+  }
+}, 1000/60)
+
 
 var scrollCallback = function(event){
-  current.y = event.pageY/outerHeight
-  current.z = event.pageX/outerWidth
+
+  console.log(event)
+
+  if (document.body.clientHeight > document.body.clientWidth){
+    current.y = event.pageX / document.body.clientHeight
+    current.x = event.pageY / document.body.clientWidth
+  } else {
+    current.y = event.pageY / document.body.clientHeight
+    current.x = event.pageX / document.body.clientWidth
+  }
+
+
+  event.preventDefault()
 };
 
 var tiltCallback = function(event){
-  window.leftRight = prepareDegrees(event.gamma);
-  window.frontBack = prepareDegrees(event.beta);
+  window.current.leftRight = prepareDegrees(event.gamma);
+  window.current.frontBack = prepareDegrees(event.beta);
+  event.preventDefault()
+};
+
+var startCallback = function(event){
+  window.current.active = true
+  event.preventDefault()
+}
+
+var endCallback = function(event){
+  window.current.active = false
+  output.write(window.current)
+  event.preventDefault()
 };
 
 function prepareDegrees(val) {
@@ -35,13 +71,22 @@ function prepareDegrees(val) {
   return (ret + 90)/360;
 }
 
+// mobile
+document.addEventListener('touchstart', startCallback);
 document.addEventListener('touchmove', scrollCallback);
-
+document.addEventListener('touchend', endCallback);
 window.addEventListener('deviceorientation', tiltCallback);
+
+// pc
+document.addEventListener('mousedown', startCallback);
+document.addEventListener('mousemove', scrollCallback);
+document.addEventListener('mouseup', endCallback);
+
 
 window.current = {
   x: 0,
   y: 0,
   leftRight: 0,
-  frontBack: 0
+  frontBack: 0,
+  active: false
 }
