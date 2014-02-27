@@ -8,7 +8,7 @@ module.exports = function Generator(instrument, clock){
 
   var stream = through(function(data){
     if (data.active){
-      var noteId = getNote(data.x, instrument)
+      var noteId = getNote(1- data.x, instrument)
       var grid = getGrid(data.y, instrument)
 
       if (noteId != null){
