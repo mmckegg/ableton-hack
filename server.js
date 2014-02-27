@@ -72,7 +72,7 @@ function addInstrument(name, instrument){
 
     generator.on('data', function(data){
       if (data[2]){
-        socket.write(JSON.stringify({color: '#6F6'}))
+        socket.write(JSON.stringify({color: instrument.color}))
       } else {
         socket.write(JSON.stringify({color: '#666'}))
       }
