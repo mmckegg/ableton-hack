@@ -48,6 +48,9 @@ var scrollCallback = function(event){
 var startCallback = function(event){
   document.documentElement.style.backgroundColor = '#FFF'
   window.current.active = true
+
+  scrollCallback(event)
+  
   event.preventDefault()
 }
 
