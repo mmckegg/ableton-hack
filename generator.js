@@ -23,12 +23,19 @@ module.exports = function Generator(instrument, clock){
   })
 
   clock.on('data', function(tick){
+    console.log(tick);
     if (repeatLength && currentNote){
       var pos = tick % repeatLength
-
-      if (pendingOff && (!pos || pos >= Math.round(repeatLength / 2))){
-        stream.queue(pendingOff)
-        pendingOff = null
+      if (instrument.legato){
+        if (pendingOff && pos === 0){
+          stream.queue(pendingOff)
+          pendingOff = null
+        }
+      } else {
+        if (pendingOff && (!pos || pos >= Math.round(repeatLength / 2))){
+          stream.queue(pendingOff)
+          pendingOff = null
+        }
       }
 
       if (pos === 0){
