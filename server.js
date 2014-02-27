@@ -8,10 +8,21 @@ var Through = require('through')
 var browserify = require('browserify')
 var readFileSync = require('fs').readFileSync
 
+var Clock = require('./clock')
+
 var html = readFileSync(__dirname + '/index.html', 'utf8')
 
 var outputPort = new midi.output()
 outputPort.openVirtualPort('hackzz')
+
+// clock from Ableton Live
+var clock = Clock()
+var clockPort = new midi.input()
+clockPort.openVirtualPort('hackzz clock')
+clockPort.ignoreTypes(true, false, true) // allow clock signals
+clockPort.on('message', function(delta, message){
+  clock.write(message)
+})
 
 var server = http.createServer(function(req, res){
   if (req.url == '/bundle.js'){
