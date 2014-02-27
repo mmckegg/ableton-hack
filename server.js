@@ -20,6 +20,12 @@ var output = Through(function(data){
   console.log('send:', data)
 })
 
+// midi learning hack
+// setTimeout(function(){
+//   output.write([144,33,127]);
+//   output.write([144,33,0]);
+// }, 3000);
+
 // clock from Ableton Live
 var clock = Clock()
 var clockPort = new midi.input()
