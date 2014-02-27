@@ -80,6 +80,8 @@ function addInstrument(name, instrument){
 
     socket.on('end', function(){
       clearInterval(activeTimer)
+      socket.unpipe()
+      generator.unpipe()
     })
 
     var activeTimer = setInterval(function(){
