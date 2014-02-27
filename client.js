@@ -30,13 +30,6 @@ function disconnected(){
   document.body.style.backgroundColor = '#C00'
 }
 
-// send data to server
-setInterval(function(){
-  if (window.current.active){
-    output.write(current)
-  }
-}, 1000/60)
-
 
 var scrollCallback = function(event){
 
@@ -48,14 +41,7 @@ var scrollCallback = function(event){
     current.x = event.pageX / document.body.clientWidth
   }
 
-
-  event.preventDefault()
-};
-
-var tiltCallback = function(event){
-
-  window.current.z = Math.abs(event.beta / 90)
-
+  output.write(current)
   event.preventDefault()
 };
 
@@ -89,7 +75,6 @@ function prepareDegrees(val) {
 document.addEventListener('touchstart', startCallback);
 document.addEventListener('touchmove', scrollCallback);
 document.addEventListener('touchend', endCallback);
-window.addEventListener('deviceorientation', tiltCallback);
 
 // pc
 document.addEventListener('mousedown', startCallback);
