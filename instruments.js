@@ -20,7 +20,7 @@ module.exports = {
   bass: {
     grids: [1/8, 1/4],
     notes: [36,48, 38, 50, 40, 52, 41, 53],
-    channel: 146
+    channel: 146,
     color: '#C6C'
   },
 
