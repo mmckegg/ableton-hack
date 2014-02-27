@@ -9,7 +9,7 @@ module.exports = function Generator(instrument, clock){
   var stream = through(function(data){
     if (data.active){
       var noteId = getNote(data.x, instrument)
-      var grid = getGrid(data.frontBack, instrument)
+      var grid = getGrid(data.z, instrument)
 
       if (noteId != null){
         currentNote = [instrument.channel, noteId, 127];

@@ -12,7 +12,6 @@ var output = through(function(data){
   if (message != lastMessage){
     this.queue(message) 
     lastMessage = message
-    console.log(data)
   }
 })
 output.pipe(ws)
@@ -27,8 +26,6 @@ setInterval(function(){
 
 var scrollCallback = function(event){
 
-  console.log(event)
-
   if (document.body.clientHeight > document.body.clientWidth){
     current.y = event.pageX / document.body.clientHeight
     current.x = event.pageY / document.body.clientWidth
@@ -42,8 +39,9 @@ var scrollCallback = function(event){
 };
 
 var tiltCallback = function(event){
-  window.current.leftRight = prepareDegrees(event.gamma);
-  window.current.frontBack = prepareDegrees(event.beta);
+
+  window.current.z = Math.abs(event.beta / 90)
+
   event.preventDefault()
 };
 
@@ -59,16 +57,16 @@ var endCallback = function(event){
 };
 
 function prepareDegrees(val) {
-  var ret = 0;
-  if(Math.min(val, -90) < -90){
-    ret = -90;
-  } else if (Math.max(val, 90) > 90) {
-    ret = 90;
-  } else {
-    ret = val;
-  }
+  //var ret = 0;
+  //if(Math.min(val, -90) < -90){
+  //  ret = -90;
+  //} else if (Math.max(val, 90) > 90) {
+  //  ret = 90;
+  //} else {
+  //  ret = val;
+  //}
 
-  return (ret + 90)/360;
+  return ((val+360+90) % 360) / 360;
 }
 
 // mobile
@@ -86,7 +84,6 @@ document.addEventListener('mouseup', endCallback);
 window.current = {
   x: 0,
   y: 0,
-  leftRight: 0,
-  frontBack: 0,
+  z: 0,
   active: false
 }
