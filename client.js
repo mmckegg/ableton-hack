@@ -3,7 +3,6 @@ var through = require('through')
 
 // specify instrument
 var socketUrl = '/sockets' + window.location.pathname
-
 // server socket
 var ws = shoe(socketUrl)
 var lastMessage = null
@@ -15,6 +14,21 @@ var output = through(function(data){
   }
 })
 output.pipe(ws)
+
+var disconnectTimer = null
+ws.on('data', function(data){
+  var data = JSON.parse(data)
+  if (data.color){
+    document.body.style.backgroundColor = data.color
+  }
+
+  clearTimeout(disconnectTimer)
+  disconnectTimer = setTimeout(disconnected, 1000)
+})
+
+function disconnected(){
+  document.body.style.backgroundColor = '#C00'
+}
 
 // send data to server
 setInterval(function(){
@@ -46,11 +60,13 @@ var tiltCallback = function(event){
 };
 
 var startCallback = function(event){
+  document.documentElement.style.backgroundColor = '#FFF'
   window.current.active = true
   event.preventDefault()
 }
 
 var endCallback = function(event){
+  document.documentElement.style.backgroundColor = '#000'
   window.current.active = false
   output.write(window.current)
   event.preventDefault()

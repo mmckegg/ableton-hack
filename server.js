@@ -67,12 +67,26 @@ function addInstrument(name, instrument){
     var generator = Generator(instrument, clock)
     console.log('+ ' + name + ' connected')
 
-    socket.on('data', function(data){
-      console.log(data)
+    socket.pipe(ParseJSON()).pipe(generator).pipe(output)
+    socket.write(JSON.stringify({color: '#666'}))
+
+    generator.on('data', function(data){
+      if (data[2]){
+        socket.write(JSON.stringify({color: '#6F6'}))
+      } else {
+        socket.write(JSON.stringify({color: '#666'}))
+      }
     })
 
-    socket.pipe(ParseJSON()).pipe(generator).pipe(output)
+    socket.on('end', function(){
+      clearInterval(activeTimer)
+    })
+
+    var activeTimer = setInterval(function(){
+      socket.write(JSON.stringify({active: true}))
+    }, 500)
   })
+
 
   // LISTEN!
   sock.install(server, '/sockets/' + name);

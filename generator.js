@@ -23,7 +23,6 @@ module.exports = function Generator(instrument, clock){
   })
 
   clock.on('data', function(tick){
-    console.log(tick);
     if (repeatLength && currentNote){
       var pos = tick % repeatLength
       if (instrument.legato){
