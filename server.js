@@ -1,19 +1,24 @@
 var http = require('http')
 var midi = require('midi')
-
 var shoe = require('shoe')
-
 var Through = require('through')
-
 var browserify = require('browserify')
 var readFileSync = require('fs').readFileSync
+var os = require("os")
 
 var Clock = require('./clock')
+var Generator = require('./generator')
 
+var instruments = require('./instruments')
 var html = readFileSync(__dirname + '/index.html', 'utf8')
 
+// stream output to Ableton Live
 var outputPort = new midi.output()
 outputPort.openVirtualPort('hackzz')
+var output = Through(function(data){
+  outputPort.sendMessage(data)
+  console.log('send:', data)
+})
 
 // clock from Ableton Live
 var clock = Clock()
@@ -24,6 +29,7 @@ clockPort.on('message', function(delta, message){
   clock.write(message)
 })
 
+// serve the assets
 var server = http.createServer(function(req, res){
   if (req.url == '/bundle.js'){
     res.writeHead(200, {'content-type': 'application/javascript'})
@@ -34,19 +40,40 @@ var server = http.createServer(function(req, res){
   }
 })
 
-
-var sock = shoe(function (stream) {
-  var input = Through(function(data){
-    this.queue(JSON.parse(data))
-  })
-  stream.pipe(input)
-
-  input.on('data', function(data){
-    outputPort.sendMessage(data)
-    console.log(data)
-  })
+// client connections
+Object.keys(instruments).forEach(function(name){
+  addInstrument(name, instruments[name])
 })
 
-sock.install(server, '/anarchy');
-
+// listen
 server.listen(1337)
+console.log('Go to any of the following and rock out:')
+
+Object.keys(instruments).forEach(function(name){
+  console.log(' - http://' + os.hostname() + ':1337/' + name)
+})
+
+////////////////////
+
+function addInstrument(name, instrument){
+  var sock = shoe(function (socket) {
+
+    var generator = Generator(instrument, clock)
+    console.log('+ ' + name + ' connected')
+
+    socket.on('data', function(data){
+      console.log(data)
+    })
+
+    socket.pipe(ParseJSON()).pipe(generator).pipe(output)
+  })
+
+  // LISTEN!
+  sock.install(server, '/sockets/' + name);
+}
+
+function ParseJSON(){
+  return Through(function(data){
+    this.queue(JSON.parse(data))
+  })
+}
