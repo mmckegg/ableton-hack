@@ -3,6 +3,7 @@ var grids = [1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/24, 1/12, 1/6, 1/3, 2/3]
 module.exports = {
   drums: {
     grids: grids,
+    legato: true,
     notes: [30,31,32,33],
     channel: 144
   },
