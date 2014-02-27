@@ -1,5 +1,4 @@
 var http = require('http')
-var MidiPort = require('midi-stream')
 var midi = require('midi')
 
 var shoe = require('shoe')
@@ -7,6 +6,9 @@ var shoe = require('shoe')
 var Through = require('through')
 
 var browserify = require('browserify')
+var readFileSync = require('fs').readFileSync
+
+var html = readFileSync(__dirname + '/index.html', 'utf8')
 
 var outputPort = new midi.output()
 outputPort.openVirtualPort('hackzz')
@@ -17,7 +19,7 @@ var server = http.createServer(function(req, res){
     browserify('./client.js').bundle({debug: true}).pipe(res)
   } else {
     res.writeHead(200, {'content-type': 'text/html'})
-    res.end('<body><script src="/bundle.js"></script></body>')
+    res.end(html)
   }
 })
 
@@ -27,7 +29,7 @@ var sock = shoe(function (stream) {
     this.queue(JSON.parse(data))
   })
   stream.pipe(input)
-  
+
   input.on('data', function(data){
     outputPort.sendMessage(data)
     console.log(data)
